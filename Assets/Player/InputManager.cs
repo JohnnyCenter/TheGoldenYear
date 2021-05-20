@@ -8,6 +8,7 @@ public class InputManager : MonoBehaviour
 
     [SerializeField] Movement movement;
     [SerializeField] PlayerLook playerLook;
+    [SerializeField] PlayerRaycast playerRaycast;
 
     PlayerControls controls;
     PlayerControls.GroundMovementActions groundMove;
@@ -24,6 +25,8 @@ public class InputManager : MonoBehaviour
 
         groundMove.MouseX.performed += ctx => mouseInput.x = ctx.ReadValue<float>();
         groundMove.MouseY.performed += ctx => mouseInput.y = ctx.ReadValue<float>();
+
+        groundMove.Interact.performed += _ => playerRaycast.InteractPressed();
     }
 
     private void Update()
