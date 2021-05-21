@@ -14,6 +14,8 @@ public class PlayerLook : MonoBehaviour
     [SerializeField] float xClamp = 85f;
     float xRotation = 0f;
 
+    public bool isDisabled;
+
     private void Awake()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -22,13 +24,16 @@ public class PlayerLook : MonoBehaviour
 
     private void Update()
     {
-        transform.Rotate(Vector3.up, mouseX * Time.deltaTime);
+        if (!isDisabled)
+        {
+            transform.Rotate(Vector3.up, mouseX * Time.deltaTime);
 
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -xClamp, xClamp);
-        Vector3 targetRotation = transform.eulerAngles;
-        targetRotation.x = xRotation;
-        playerCamera.eulerAngles = targetRotation;
+            xRotation -= mouseY;
+            xRotation = Mathf.Clamp(xRotation, -xClamp, xClamp);
+            Vector3 targetRotation = transform.eulerAngles;
+            targetRotation.x = xRotation;
+            playerCamera.eulerAngles = targetRotation;
+        }
     }
 
     public void RecieveInput (Vector2 mouseInput)

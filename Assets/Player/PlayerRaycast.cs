@@ -6,28 +6,51 @@ public class PlayerRaycast : MonoBehaviour
 {
     [SerializeField] Transform cam;
     [SerializeField] float raycastLength = 5f;
-    [SerializeField] GameObject canvasText_interact;
-    [SerializeField] LayerMask doorMask;
 
+    [SerializeField] LayerMask interactableMask;
+    [SerializeField] PlayerManagerTemporary playerManager;
+
+    [SerializeField]
     bool seesDoor = false;
+    bool seesBed = false;
+    public bool isDisabled = false;
 
     void Update()
     {
-        #region sees door
-        RaycastHit hit_door;
-        if(Physics.Raycast(cam.position, cam.forward, out hit_door, raycastLength, doorMask))
+        if (!isDisabled)
         {
-            canvasText_interact.SetActive(true);
-            seesDoor = true;
-        }
-        else
-        {
-            canvasText_interact.SetActive(false);
-            seesDoor = false;
-        }
-        #endregion
+            #region raycasts
 
-        Debug.Log("SEES DOOR: " + seesDoor);
+            //IF RAYCAST IS EMPTY (no layermask)
+            RaycastHit hit;
+            if (Physics.Raycast(cam.position, cam.forward, out hit, raycastLength, interactableMask))
+            {
+                if (!playerManager.objectsSeen.Contains(hit.collider.gameObject))
+                {
+                    playerManager.objectsSeen.Add(hit.collider.gameObject);
+                }
+
+                if(hit.collider.tag == "Bed")
+                {
+
+                    seesBed = true;
+                }   
+                
+                if(hit.collider.tag == "Door")
+                {
+
+                    seesDoor = true;
+                }
+
+            } else
+            {
+                seesDoor = false;
+                seesBed = false;
+                playerManager.objectsSeen.Clear();
+            }
+
+            #endregion
+        }
     }
 
     private void OnDrawGizmos()
@@ -38,16 +61,78 @@ public class PlayerRaycast : MonoBehaviour
 
     public void InteractPressed()
     {
-        if (seesDoor)
+        if (!isDisabled)
         {
-            OpenDoor();
+            if (seesDoor)
+            {
+                StartCoroutine(DoorAnim());
+            }            
+            
+            if (seesBed)
+            {
+                StartCoroutine(BedAnim());
+            }
+
         }
+        
     }
 
+    #region bed things
+    private IEnumerator BedAnim()
+    {
+        playerManager.DisablePlayerAll();
+        GoToBed();
 
+        //HVOR MANGE SEKUNDER VARER ANIM;
+        yield return new WaitForSeconds(2f);
+
+        //FADE TO BLACK
+
+        //yield return new WaitForSeconds(2f);
+
+        EndDay();
+
+        playerManager.EnablePlayerAll();
+
+        yield return null;
+    }
+
+    void GoToBed()
+    {
+        Debug.Log("GO TO BED NOW");
+        //PLAY ANIM
+        //PLAY SOUND EFFECT
+    }
+
+    void EndDay()
+    {
+        //SWITCH SCENE
+        //PROGRESSION COUNTER
+    }
+
+    
+    #endregion
+
+    #region door things
     //HER KAN DU KALLE PÅ FUNKSJONEN FOR Å ÅPNE DØRA OSV
-    public void OpenDoor()
+    void OpenDoor()
     {
         Debug.Log("OPEN DOOR");
+        //PLAY ANIM
+        //PLAY SOUND EFFECT
     }
+
+    private IEnumerator DoorAnim()
+    {
+        playerManager.DisablePlayerAll();
+        OpenDoor();
+
+        //HVOR MANGE SEKUNDER VARER ANIM;
+        yield return new WaitForSeconds(2f);
+
+        playerManager.EnablePlayerAll();
+
+        yield return null;
+    }
+    #endregion
 }
